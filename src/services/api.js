@@ -4,12 +4,7 @@ const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
 function resolveApiBaseUrl() {
   if (configuredApiBaseUrl) return configuredApiBaseUrl;
-
-  if (typeof window !== "undefined" && window.location.hostname) {
-    return `${window.location.protocol}//${window.location.hostname}:4000/api`;
-  }
-
-  return "http://localhost:4000/api";
+  return "https://backendnext-ni5g.onrender.com/api";
 }
 
 const apiBaseUrl = resolveApiBaseUrl();
