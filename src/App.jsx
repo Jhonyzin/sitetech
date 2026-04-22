@@ -382,6 +382,7 @@ function getFallbackActivities(module) {
 }
 
 function AuthPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     fullName: "",
@@ -449,14 +450,13 @@ function AuthPage() {
           email: "",
           password: "",
           confirmPassword: "",
-          role: "aluno",
-          accessCode: ""
+          role: "aluno"
         });
         return;
       }
       const { data } = await api.post("/auth/login", { email: form.email, password: form.password });
       localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setMsg(error.response?.data?.message || "Erro ao processar requisiÃ§Ã£o.");
     }
