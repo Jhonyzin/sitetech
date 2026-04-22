@@ -389,8 +389,7 @@ function AuthPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "aluno",
-    accessCode: ""
+    role: "aluno"
   });
   const [reset, setReset] = useState({ email: "", code: "", newPassword: "", confirmPassword: "" });
   const [resetCodeHint, setResetCodeHint] = useState("");
@@ -635,25 +634,12 @@ function AuthPage() {
                     value={form.role}
                     onFocus={() => setActiveField("role")}
                     onBlur={() => setActiveField("")}
-                    onChange={(e) => setForm({ ...form, role: e.target.value, accessCode: "" })}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
                   >
                     <option value="aluno">Aluno</option>
                     <option value="professor">Professor</option>
                   </select>
-                  {form.role !== "aluno" && (
-                    <>
-                      <label htmlFor="accessCode">CÃƒÂ³digo de acesso</label>
-                      <input
-                        id="accessCode"
-                        placeholder="CÃƒÂ³digo para cadastro de staff"
-                        value={form.accessCode}
-                        onFocus={() => setActiveField("accessCode")}
-                        onBlur={() => setActiveField("")}
-                        onChange={(e) => setForm({ ...form, accessCode: e.target.value })}
-                        required
-                      />
-                    </>
-                  )}
+
                 </>
               )}
               <label htmlFor="email">E-mail</label>
@@ -2054,3 +2040,4 @@ export default function App() {
     </>
   );
 }
+
