@@ -2,6 +2,44 @@
 import { useEffect, useState } from "react";
 import api from "./services/api.js";
 
+function normalizePtBrText(value) {
+  if (value === null || value === undefined) return "";
+
+  return String(value)
+    .replace(/Ã¡/g, "á")
+    .replace(/Ã /g, "à")
+    .replace(/Ã¢/g, "â")
+    .replace(/Ã£/g, "ã")
+    .replace(/Ã¤/g, "ä")
+    .replace(/Ã©/g, "é")
+    .replace(/Ã¨/g, "è")
+    .replace(/Ãª/g, "ê")
+    .replace(/Ã«/g, "ë")
+    .replace(/Ã­/g, "í")
+    .replace(/Ã¬/g, "ì")
+    .replace(/Ã®/g, "î")
+    .replace(/Ã¯/g, "ï")
+    .replace(/Ã³/g, "ó")
+    .replace(/Ã²/g, "ò")
+    .replace(/Ã´/g, "ô")
+    .replace(/Ãµ/g, "õ")
+    .replace(/Ã¶/g, "ö")
+    .replace(/Ãº/g, "ú")
+    .replace(/Ã¹/g, "ù")
+    .replace(/Ã»/g, "û")
+    .replace(/Ã¼/g, "ü")
+    .replace(/Ã§/g, "ç")
+    .replace(/Ã‘/g, "Ñ")
+    .replace(/Ã±/g, "ñ")
+    .replace(/â/g, "'")
+    .replace(/â/g, "\"")
+    .replace(/â/g, "\"")
+    .replace(/â/g, "-")
+    .replace(/â/g, "-")
+    .replace(/â€¦/g, "...")
+    .replace(/�/g, "");
+}
+
 function getYoutubeEmbedUrl(url) {
   if (!url) return "";
   try {
@@ -90,6 +128,12 @@ function AuthPage() {
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [smoothLook, setSmoothLook] = useState({ x: 0, y: 0, mx: 0, my: 0 });
   const [rememberLogin, setRememberLogin] = useState(true);
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     function handleMove(event) {
@@ -1749,4 +1793,3 @@ export default function App() {
     </>
   );
 }
-
