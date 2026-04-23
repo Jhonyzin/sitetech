@@ -120,21 +120,3 @@ CREATE TABLE IF NOT EXISTS class_modules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (class_id, module_id)
 );
-
-INSERT INTO modules (id, "order", title, description, icon)
-VALUES
-  ('m1', 1, 'Computação Básica', 'Partes do computador e funções básicas.', '🖥️'),
-  ('m2', 2, 'Informática Básica', 'Periféricos, atalhos e boas práticas.', '⌨️')
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO lessons (module_id, title, summary, video_url, duration_min, position)
-VALUES
-  ('m1', 'Conhecendo o gabinete', 'Componentes internos e funções.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 12, 1),
-  ('m2', 'Teclado e mouse na prática', 'Atalhos e produtividade.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 1)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO challenges (title, type, description, xp_reward, active)
-VALUES
-  ('Desafio Semanal', 'weekly', 'Conclua 3 aulas nesta semana.', 100, TRUE),
-  ('Desafio Difícil', 'hard', 'Resolva 2 atividades sem erro.', 150, TRUE)
-ON CONFLICT DO NOTHING;
