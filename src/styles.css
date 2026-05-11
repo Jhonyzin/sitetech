@@ -371,6 +371,30 @@ small {
   color: #f1f7ee;
 }
 
+.coding-challenge {
+  display: grid;
+  gap: 12px;
+}
+
+.challenge-tests {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #c7d7f3;
+  background: #eef4ff;
+}
+
+.challenge-tests code {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+
 .lesson-blocks {
   display: flex;
   flex-direction: column;

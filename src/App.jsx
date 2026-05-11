@@ -90,8 +90,8 @@ function isRemovedModule(module) {
     REMOVED_MODULE_IDS.has(id) ||
     order > 10 ||
     title.includes("jogos interativos") ||
-    title.includes("m�dulo 11") ||
-    title.includes("m�dulo 11")
+    title.includes("módulo 11") ||
+    title.includes("módulo 11")
   );
 }
 
@@ -176,7 +176,7 @@ function AuthPage() {
     try {
       if (mode === "register") {
         await api.post("/auth/register", form);
-        setMsg("Cadastro realizado! Agora fa?a login.");
+        setMsg("Cadastro realizado! Agora faça login.");
         setMode("login");
         setForm({
           fullName: "",
@@ -192,7 +192,7 @@ function AuthPage() {
       localStorage.setItem("token", data.token);
       navigate("/dashboard", { replace: true });
     } catch (error) {
-      setMsg(error.response?.data?.message || "Erro ao processar requisi??o.");
+      setMsg(error.response?.data?.message || "Erro ao processar requisição.");
     }
   }
 
@@ -200,10 +200,10 @@ function AuthPage() {
     try {
       const { data } = await api.post("/auth/forgot-password", { email: reset.email });
       setMsg(data.message);
-      setResetCodeHint(data.devCode ? `C?digo (modo dev): ${data.devCode}` : "");
+      setResetCodeHint(data.devCode ? `Código (modo dev): ${data.devCode}` : "");
       setMode("reset");
     } catch (error) {
-      setMsg(error.response?.data?.message || "Falha ao solicitar recupera??o.");
+      setMsg(error.response?.data?.message || "Falha ao solicitar recuperação.");
     }
   }
 
@@ -289,7 +289,7 @@ function AuthPage() {
                 required
               />
               <input
-                placeholder="C?digo de recupera??o"
+                placeholder="Código de recuperação"
                 value={reset.code}
                 onFocus={() => setActiveField("reset-code")}
                 onBlur={() => setActiveField("")}
@@ -328,9 +328,9 @@ function AuthPage() {
               {resetCodeHint && <small>{resetCodeHint}</small>}
               {msg && <p aria-live="polite">{msg}</p>}
               <p>
-                Esqueceu o c?digo?{" "}
+                Esqueceu o código?{" "}
                 <button type="button" className="ghost" onClick={requestResetCode}>
-                  Gerar novo c?digo
+                  Gerar novo código
                 </button>
               </p>
             </>
@@ -339,7 +339,7 @@ function AuthPage() {
             <>
               <span className="auth-mark" aria-hidden="true"></span>
               <h3>{mode === "login" ? "Bem-vindo(a) de volta!" : "Crie sua conta"}</h3>
-              <p className="auth-helper">{mode === "login" ? "Digite seus dados para entrar" : "Preencha os campos para come?ar"}</p>
+              <p className="auth-helper">{mode === "login" ? "Digite seus dados para entrar" : "Preencha os campos para começar"}</p>
               {mode === "register" && (
                 <>
                   <label htmlFor="fullName">Nome completo</label>
@@ -490,7 +490,7 @@ function TopNav() {
       <Link to="/perfil" className="side-link">Perfil</Link>
       <Link to="/ranking" className="side-link">Ranking</Link>
       {me?.role === "professor" && (
-        <Link to="/gestao" className="side-link">Gest�o</Link>
+        <Link to="/gestao" className="side-link">Gestão</Link>
       )}
       <button type="button" onClick={logout} className="ghost side-link side-button">
         Sair
@@ -553,7 +553,7 @@ function ClassesSection({ userRole }) {
       await loadClasses();
       setSelectedClassId(data.turma.id);
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possÃ­vel entrar na turma.");
+      setMessage(error.response?.data?.message || "Não foi possível entrar na turma.");
     }
   }
 
@@ -563,7 +563,7 @@ function ClassesSection({ userRole }) {
       {userRole === "aluno" ? (
         <>
           <div className="inline-form">
-            <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="Digite o cÃ³digo da turma" />
+            <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="Digite o código da turma" />
             <button type="button" onClick={joinClass} disabled={!joinCode.trim()}>
               Entrar na turma
             </button>
@@ -660,10 +660,14 @@ function ManagementPage() {
   const [questionForm, setQuestionForm] = useState({
     moduleId: "",
     title: "",
+    activityType: "coding_challenge",
     difficulty: "🟢 Fácil",
     question: "",
     optionsText: "",
     expectedAnswer: "",
+    starterCode: "",
+    visibleTestsText: "",
+    hiddenTestsText: "",
     explanation: ""
   });
   const [classForm, setClassForm] = useState({ name: "", description: "" });
@@ -701,7 +705,7 @@ function ManagementPage() {
   }
 
   useEffect(() => {
-    loadBase().catch(() => setMessage("NÃ£o foi possÃ­vel carregar a Ã¡rea de Gest�o."));
+    loadBase().catch(() => setMessage("Não foi possível carregar a área de Gestão."));
   }, []);
 
   useEffect(() => {
@@ -771,7 +775,7 @@ function ManagementPage() {
       setLessonForm({ moduleId: "", title: "", summary: "", durationMin: 10, videoUrl: "", position: 1 });
       await refreshAll();
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possÃ­vel criar a aula.");
+      setMessage(error.response?.data?.message || "Não foi possí­vel criar a aula.");
     }
   }
 
@@ -781,27 +785,43 @@ function ManagementPage() {
         .split(/\r?\n/)
         .map((item) => item.trim())
         .filter(Boolean);
+      const visibleTests = questionForm.visibleTestsText
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+      const hiddenTests = questionForm.hiddenTestsText
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean);
       await api.post(`/content/modules/${questionForm.moduleId}/activities`, {
         title: questionForm.title,
+        activityType: questionForm.activityType,
         difficulty: questionForm.difficulty,
         question: questionForm.question,
-        options,
+        options: questionForm.activityType === "multipla_escolha" ? options : [],
         expectedAnswer: questionForm.expectedAnswer,
+        starterCode: questionForm.activityType === "coding_challenge" ? questionForm.starterCode : "",
+        visibleTests: questionForm.activityType === "coding_challenge" ? visibleTests : [],
+        hiddenTests: questionForm.activityType === "coding_challenge" ? hiddenTests : [],
         explanation: questionForm.explanation
       });
       setMessage("Questão adicionada com sucesso.");
       setQuestionForm({
         moduleId: "",
         title: "",
+        activityType: "coding_challenge",
         difficulty: "🟢 Fácil",
         question: "",
         optionsText: "",
         expectedAnswer: "",
+        starterCode: "",
+        visibleTestsText: "",
+        hiddenTestsText: "",
         explanation: ""
       });
       await refreshAll(selectedClassId, questionForm.moduleId);
     } catch (error) {
-      setMessage(error.response?.data?.message || "N?o foi poss?vel criar a quest?o.");
+      setMessage(error.response?.data?.message || "Não foi possível criar a questão.");
     }
   }
 
@@ -811,7 +831,7 @@ function ManagementPage() {
       setMessage("ConteÃºdo removido.");
       await refreshAll();
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possÃ­vel remover o conteÃºdo.");
+      setMessage(error.response?.data?.message || "Não foi possível remover o conteúdo.");
     }
   }
 
@@ -821,7 +841,7 @@ function ManagementPage() {
       setMessage("QuestÃ£o removida.");
       await refreshAll(selectedClassId, moduleId);
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possÃ­vel remover a questÃ£o.");
+      setMessage(error.response?.data?.message || "Não foi possível remover a questão.");
     }
   }
 
@@ -948,29 +968,50 @@ function ManagementPage() {
         </article>
 
         <article className="card">
-          <h3>Criar questÃ£o</h3>
+          <h3>Criar desafio</h3>
           <select value={questionForm.moduleId} onChange={(e) => setQuestionForm({ ...questionForm, moduleId: e.target.value })}>
             <option value="">Selecione um mÃ³dulo</option>
             {modules.map((module) => (
               <option key={module.id} value={module.id}>{module.title}</option>
             ))}
           </select>
-          <input value={questionForm.title} onChange={(e) => setQuestionForm({ ...questionForm, title: e.target.value })} placeholder="TÃ­tulo da questÃ£o" />
+          <input value={questionForm.title} onChange={(e) => setQuestionForm({ ...questionForm, title: e.target.value })} placeholder="Título do desafio" />
+          <select value={questionForm.activityType} onChange={(e) => setQuestionForm({ ...questionForm, activityType: e.target.value })}>
+            <option value="coding_challenge">Desafio de código</option>
+            <option value="multipla_escolha">Múltipla escolha</option>
+          </select>
           <select value={questionForm.difficulty} onChange={(e) => setQuestionForm({ ...questionForm, difficulty: e.target.value })}>
             <option value="🟢 F?cil">FÃ¡cil</option>
             <option value="🟡 M?dio">MÃ©dio</option>
             <option value="🔴 Dif?cil">DifÃ­cil</option>
           </select>
-          <textarea value={questionForm.question} onChange={(e) => setQuestionForm({ ...questionForm, question: e.target.value })} placeholder="Enunciado da questÃ£o" rows={4} />
-          <textarea value={questionForm.optionsText} onChange={(e) => setQuestionForm({ ...questionForm, optionsText: e.target.value })} placeholder={"Uma opÃ§Ã£o por linha"} rows={4} />
-          <input value={questionForm.expectedAnswer} onChange={(e) => setQuestionForm({ ...questionForm, expectedAnswer: e.target.value })} placeholder="Resposta correta" />
+          <textarea value={questionForm.question} onChange={(e) => setQuestionForm({ ...questionForm, question: e.target.value })} placeholder="Enunciado do desafio" rows={4} />
+          {questionForm.activityType === "multipla_escolha" && (
+            <textarea value={questionForm.optionsText} onChange={(e) => setQuestionForm({ ...questionForm, optionsText: e.target.value })} placeholder={"Uma opção por linha"} rows={4} />
+          )}
+          {questionForm.activityType === "coding_challenge" && (
+            <>
+              <textarea value={questionForm.starterCode} onChange={(e) => setQuestionForm({ ...questionForm, starterCode: e.target.value })} placeholder={"Código inicial, como no LeetCode"} rows={7} className="code" />
+              <textarea value={questionForm.visibleTestsText} onChange={(e) => setQuestionForm({ ...questionForm, visibleTestsText: e.target.value })} placeholder={"Testes visíveis, um por linha\nEx: soma(2, 3) deve retornar 5"} rows={3} />
+              <textarea value={questionForm.hiddenTestsText} onChange={(e) => setQuestionForm({ ...questionForm, hiddenTestsText: e.target.value })} placeholder={"Testes ocultos, um por linha"} rows={3} />
+            </>
+          )}
+          <input value={questionForm.expectedAnswer} onChange={(e) => setQuestionForm({ ...questionForm, expectedAnswer: e.target.value })} placeholder={questionForm.activityType === "coding_challenge" ? "Palavra-chave ou trecho esperado no código" : "Resposta correta"} />
           <textarea value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} placeholder="ExplicaÃ§Ã£o do feedback" rows={3} />
           <button
             type="button"
             onClick={createQuestion}
-            disabled={!questionForm.moduleId || !questionForm.title.trim() || !questionForm.question.trim() || !questionForm.optionsText.trim() || !questionForm.expectedAnswer.trim() || !questionForm.explanation.trim()}
+            disabled={
+              !questionForm.moduleId ||
+              !questionForm.title.trim() ||
+              !questionForm.question.trim() ||
+              (questionForm.activityType === "multipla_escolha" && !questionForm.optionsText.trim()) ||
+              (questionForm.activityType === "coding_challenge" && !questionForm.starterCode.trim()) ||
+              !questionForm.expectedAnswer.trim() ||
+              !questionForm.explanation.trim()
+            }
           >
-            Criar questÃ£o
+            Criar desafio
           </button>
         </article>
       </section>
@@ -1020,14 +1061,14 @@ function ManagementPage() {
             <h3>Turma selecionada</h3>
             <p><strong>{selectedClass.name}</strong></p>
             <div className="invite-card">
-              <small>CÃ³digo de convite ?nico</small>
+              <small>Código de convite único</small>
               <strong className="invite-code">{selectedClass.code}</strong>
               <button type="button" onClick={copyInviteCode}>
-                Copiar c?digo
+                Copiar código
               </button>
               {copyState && <small>{copyState}</small>}
             </div>
-            <p>{selectedClass.description || "Sem descriÃ§Ã£o."}</p>
+            <p>{selectedClass.description || "Sem descrição."}</p>
             <div className="inline-form">
               <input value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} placeholder="E-mail do aluno" />
               <button type="button" onClick={addMember} disabled={!memberEmail.trim()}>
@@ -1111,10 +1152,11 @@ function ManagementPage() {
               {selectedModuleDetails.activities?.map((activity) => (
                 <article key={activity.id} className="badge on">
                   <strong>{activity.title}</strong>
+                  <small>Tipo: {activity.type === "coding_challenge" ? "Desafio de código" : "Múltipla escolha"}</small>
                   <small>{activity.question}</small>
-                  <small>Resposta correta: {activity.expectedAnswer}</small>
+                  <small>{activity.type === "coding_challenge" ? "Trecho esperado" : "Resposta correta"}: {activity.expectedAnswer}</small>
                   <button type="button" onClick={() => deleteQuestion(selectedModuleDetails.id, activity.id)}>
-                    Remover questÃ£o
+                    Remover questão
                   </button>
                 </article>
               ))}
@@ -1145,9 +1187,9 @@ function ProfessorDashboard() {
     <AppLayout>
       <section className="card hero-card">
         <h2>Painel do professor</h2>
-        <p>Crie turmas, compartilhe o c?digo de convite gerado automaticamente e publique seus pr?prios conte?dos.</p>
+        <p>Crie turmas, compartilhe o código de convite gerado automaticamente e publique seus próprios conteúdos.</p>
         <Link to="/gestao">
-          <button>Abrir gest�o</button>
+          <button>Abrir gestão</button>
         </Link>
       </section>
 
@@ -1168,7 +1210,7 @@ function ProfessorDashboard() {
                 <small>Alunos: {item.memberCount}</small>
               </article>
             ))}
-            {!classes.length && <p>Crie sua primeira turma na ?rea de gest?o.</p>}
+            {!classes.length && <p>Crie sua primeira turma na área de gestão.</p>}
           </div>
         </article>
       </section>
@@ -1183,7 +1225,7 @@ function ProfessorDashboard() {
               <small>Turmas vinculadas: {module.classes?.length || 0}</small>
             </article>
           ))}
-          {!modules.length && <p>Voc? ainda n?o criou conte?dos.</p>}
+          {!modules.length && <p>Você ainda não criou conteúdos.</p>}
         </div>
       </section>
 
@@ -1227,22 +1269,22 @@ function Dashboard() {
     <AppLayout>
       <section className="card hero-card">
         <h2>Bem-vindo, {user.displayName}!</h2>
-        <p>Continue sua jornada e alcance o pr?ximo n?vel com aulas, atividades e desafios.</p>
+        <p>Continue sua jornada e alcance o próximo nível com aulas, atividades e desafios.</p>
         {nextModule ? (
           <Link to={`/modulo/${nextModule.id}`}>
             <button>Continuar: {normalizePtBrText(nextModule.title)}</button>
           </Link>
         ) : (
-          <p>Parab?ns! Todos os m?dulos atuais foram conclu?dos.</p>
+          <p>Parabéns! Todos os módulos atuais foram concluídos.</p>
         )}
       </section>
-      <h2>Ol?, {user.displayName}</h2>
-      <p>N?vel atual: {normalizePtBrText(user.level.title)}</p>
+      <h2>Olá, {user.displayName}</h2>
+      <p>Nível atual: {normalizePtBrText(user.level.title)}</p>
       <p>Streak: {user.streak} dias </p>
       <div className="xp-bar">
         <div className="xp-fill" style={{ width: `${progress}%` }} />
       </div>
-      <small>XP total: {user.xp} | Faltam {user.xpToNextLevel} XP para o proximo nivel  </small>
+      <small>XP total: {user.xp} | Faltam {user.xpToNextLevel} XP para o próximo nível  </small>
       {xpNotice && <p className="xp-notice" aria-live="polite">{xpNotice} </p>}
       <section className="card">
         <h3>Desafios ativos</h3>
@@ -1259,18 +1301,18 @@ function Dashboard() {
         </div>
       </section>
       <section className="card">
-        <h3>Cursos e m�dulos </h3>
+        <h3>Cursos e módulos </h3>
         <div className="grid">
           {modules.map((module) => (
             <article key={module.id} className="badge on">
               <strong>
-                {module.icon} M�dulo {module.order}
+                {module.icon} Módulo {module.order}
               </strong>
               <p>{normalizePtBrText(module.title)}</p>
               <small>{normalizePtBrText(module.description)}</small>
               <small>Progresso: {Math.round(moduleProgress[module.id] || 0)}%</small>
               <Link to={`/modulo/${module.id}`}>
-                <button>{(moduleProgress[module.id] || 0) > 0 ? "Continuar" : "Iniciar m�dulo"}</button>
+                <button>{(moduleProgress[module.id] || 0) > 0 ? "Continuar" : "Iniciar módulo"}</button>
               </Link>
             </article>
           ))}
@@ -1312,26 +1354,26 @@ function ModulePage() {
 
   async function completeLesson() {
     if (!hasReadAll) {
-      setNotice("Para concluir a aula, leia todo o conte?do e marque cada bloco como lido.");
+      setNotice("Para concluir a aula, leia todo o conteúdo e marque cada bloco como lido.");
       return;
     }
     await api.post("/users/me/xp", { action: "lesson_completed" });
     await api.post("/users/me/progress", { moduleId, percent: 35 });
-    setNotice("+10 XP por aula conclu?da");
+    setNotice("+10 XP por aula concluída");
     setLessonDone(true);
   }
 
   async function completeCourse() {
     if (!lessonDone || !allInteractionsDone) {
-      setNotice("Conclua a leitura da aula e finalize todas as intera??es antes de concluir o m?dulo.");
+      setNotice("Conclua a leitura da aula e finalize todas as interações antes de concluir o módulo.");
       return;
     }
     await api.post("/users/me/xp", { action: "course_completed", courseName: module.title });
     await api.post("/users/me/progress", { moduleId, percent: 100 });
-    setNotice("+50 XP por m?dulo conclu?do");
+    setNotice("+50 XP por módulo concluído");
   }
 
-  if (!module) return <p className="container">Carregando m�dulo...</p>;
+  if (!module) return <p className="container">Carregando módulo...</p>;
   return (
     <AppLayout>
       <Link to="/dashboard">Voltar ao dashboard</Link>
@@ -1339,13 +1381,13 @@ function ModulePage() {
         {module.icon} {normalizePtBrText(module.title)}
       </h2>
       <p>{normalizePtBrText(module.description)}</p>
-      {module.hasPhysicalDemo && <p className="xp-notice">Este m�dulo inclui demonstra��es visuais com componentes f�sicos.</p>}
+      {module.hasPhysicalDemo && <p className="xp-notice">Este módulo inclui demonstrações visuais com componentes físicos.</p>}
       <section className="card">
-        <h3>Conte�do do m�dulo</h3>
+        <h3>Conteúdo do módulo</h3>
         {lesson ? (
           <>
-            <p><strong>T�tulo:</strong> {normalizePtBrText(lesson.title)}</p>
-            <p><strong>Dura��o estimada:</strong> {lesson.durationMin} minutos</p>
+            <p><strong>Título:</strong> {normalizePtBrText(lesson.title)}</p>
+            <p><strong>Duração estimada:</strong> {lesson.durationMin} minutos</p>
             <p><strong>Resumo:</strong> {normalizePtBrText(lesson.summary)}</p>
             {getYoutubeEmbedUrl(lesson.videoUrl) && (
               <div className="video-frame">
@@ -1374,18 +1416,18 @@ function ModulePage() {
                 </div>
               ))}
             </div>
-            <small>Dica pr�tica: assista ao v�deo, leia os blocos e depois conclua a aula.</small>
-            <small>Leitura conclu�da: {readBlocks.length}/{contentBlocks.length} blocos</small>
+            <small>Dica prtica: assista ao vdeo, leia os blocos e depois conclua a aula.</small>
+            <small>Leitura concluída: {readBlocks.length}/{contentBlocks.length} blocos</small>
             <button onClick={completeLesson} disabled={!hasReadAll || lessonDone}>
-              {lessonDone ? "Aula conclu�da (+10 XP)" : "Concluir aula agora (+10 XP)"}
+              {lessonDone ? "Aula concluída (+10 XP)" : "Concluir aula agora (+10 XP)"}
             </button>
           </>
         ) : (
-          <p>Nenhuma aula cadastrada para este m�dulo ainda.</p>
+          <p>Nenhuma aula cadastrada para este módulo ainda.</p>
         )}
       </section>
       <section className="card">
-        <h3>Conte�do interativo</h3>
+        <h3>Conteúdo interativo</h3>
         <div className="grid">
           {interactions.map((item, index) => (
             <article key={item.id} className={`badge ${doneInteractions.includes(item.id) ? "on" : "off"}`}>
@@ -1394,26 +1436,26 @@ function ModulePage() {
               <button
                 onClick={() => {
                   setDoneInteractions((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
-                  setNotice("Intera��o registrada! Continue explorando.");
+                  setNotice("Interação registrada! Continue explorando.");
                 }}
                 disabled={doneInteractions.includes(item.id)}
               >
-                {doneInteractions.includes(item.id) ? "Intera��o conclu�da" : "Interagir"}
+                {doneInteractions.includes(item.id) ? "Interação concluída" : "Interagir"}
               </button>
             </article>
           ))}
         </div>
-        <small>Intera��es conclu�das: {doneInteractions.length}/{interactions.length}</small>
+        <small>Interações concluídas: {doneInteractions.length}/{interactions.length}</small>
       </section>
       <section className="card">
         <h3>Atividades avaliativas</h3>
-        <p>Resolva as quest�es e receba feedback imediato com explica��o de cada resposta.</p>
+        <p>Resolva as questões e receba feedback imediato com explicação de cada resposta.</p>
         <Link to={`/atividades/${module.id}`}>
           <button>Ir para atividades</button>
         </Link>
       </section>
       <button onClick={completeCourse} disabled={!lessonDone || !allInteractionsDone}>
-        Concluir m�dulo (+50 XP)
+        Concluir módulo (+50 XP)
       </button>
       {notice && <p className="xp-notice" aria-live="polite">{notice}</p>}
     </AppLayout>
@@ -1437,7 +1479,7 @@ function ActivitiesPage() {
     api.get(`/content/modules/${moduleId}`).then(({ data }) => {
       setModule(data);
       setIndex(0);
-      setAnswer("");
+      setAnswer(data.activities?.[0]?.type === "coding_challenge" ? data.activities[0].starterCode || "" : "");
       setFeedback("");
       setWasCorrect(false);
       setCorrectCount(0);
@@ -1456,10 +1498,10 @@ function ActivitiesPage() {
   if (!activities.length) {
     return (
       <AppLayout>
-        <Link to={`/modulo/${moduleId}`}>Voltar ao m�dulo</Link>
+        <Link to={`/modulo/${moduleId}`}>Voltar ao módulo</Link>
         <section className="card">
           <h3>Atividades avaliativas</h3>
-          <p>Este m�dulo ainda n�o possui atividades cadastradas.</p>
+          <p>Este módulo ainda não possui atividades cadastradas.</p>
         </section>
       </AppLayout>
     );
@@ -1468,6 +1510,8 @@ function ActivitiesPage() {
   const activity = activities[index];
   const progress = ((index + 1) / activities.length) * 100;
   const normalizedExpectedAnswer = String(activity.expectedAnswer || "").trim().toLowerCase();
+  const isCodingChallenge = activity.type === "coding_challenge";
+  const visibleTests = activity.visibleTests || [];
 
   function getOptionState(option) {
     const isSelected = answer === option;
@@ -1485,8 +1529,8 @@ function ActivitiesPage() {
     setIsTransitioning(true);
     const normalized = answer.trim().toLowerCase();
     const isCorrect =
-      activity.type === "completar_codigo"
-        ? normalized.includes(`${normalizedExpectedAnswer} idade`) || normalized.includes(normalizedExpectedAnswer)
+      isCodingChallenge
+        ? normalizedExpectedAnswer ? normalized.includes(normalizedExpectedAnswer) : true
         : normalized === normalizedExpectedAnswer;
 
     if (isCorrect) {
@@ -1515,12 +1559,12 @@ function ActivitiesPage() {
       }
       await api.post("/users/me/xp", { action: "activity_review" });
       await api.post("/users/me/progress", { moduleId, percent: 75 });
-      setFeedback("Atividade finalizada! B?nus aplicados.");
+      setFeedback("Atividade finalizada! Bônus aplicados.");
       window.setTimeout(() => navigate(`/modulo/${moduleId}`), 1200);
       return;
     }
     setIndex((v) => v + 1);
-    setAnswer("");
+    setAnswer(activities[index + 1]?.type === "coding_challenge" ? activities[index + 1].starterCode || "" : "");
     setFeedback("");
     setWasCorrect(false);
     setIsTransitioning(false);
@@ -1528,24 +1572,24 @@ function ActivitiesPage() {
 
   return (
     <AppLayout>
-      <Link to={`/modulo/${moduleId}`}>Voltar ao m�dulo</Link>
+      <Link to={`/modulo/${moduleId}`}>Voltar ao módulo</Link>
       <h2>{activity.title}</h2>
       <p>
-        Quest�o {index + 1} de {activities.length}
+        Questão {index + 1} de {activities.length}
       </p>
       <div className="xp-bar">
         <div className="xp-fill" style={{ width: `${progress}%` }} />
       </div>
       <section className="card">
         <p>
-          <strong>Tipo:</strong> {activity.type}
+          <strong>Tipo:</strong> {isCodingChallenge ? "Desafio de código" : "Múltipla escolha"}
         </p>
         <p>
-          <strong>N�vel:</strong> {normalizePtBrText(activity.difficulty)}
+          <strong>Nível:</strong> {normalizePtBrText(activity.difficulty)}
         </p>
         <p>{normalizePtBrText(activity.question)}</p>
 
-        {activity.options?.map((option) => (
+        {!!activity.options?.length && activity.options.map((option) => (
           <button
             key={option}
             type="button"
@@ -1557,22 +1601,28 @@ function ActivitiesPage() {
           </button>
         ))}
 
-        {activity.type === "completar_codigo" && (
-          <>
-            <label>Editor C b�sico</label>
-            <textarea value={answer || activity.starterCode} onChange={(e) => setAnswer(e.target.value)} rows={10} className="code" disabled={isTransitioning} />
-            <small>Dica: substitua ___ pelo tipo correto.</small>
-          </>
+        {isCodingChallenge && (
+          <div className="coding-challenge">
+            <div className="challenge-tests">
+              <strong>Testes visíveis</strong>
+              {visibleTests.length ? (
+                visibleTests.map((test) => <code key={test}>{test}</code>)
+              ) : (
+                <small>Sem testes visíveis cadastrados.</small>
+              )}
+            </div>
+            <label>Editor de código</label>
+            <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={12} className="code" disabled={isTransitioning} spellCheck="false" />
+            <small>Resolva como em um desafio de programação. O sistema confere se o trecho esperado aparece na solução.</small>
+          </div>
         )}
 
-        {!activity.options && activity.type !== "completar_codigo" && (
-          <input value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="Digite sua resposta" disabled={isTransitioning} />
-        )}
+        {!activity.options?.length && !isCodingChallenge && <p className="xp-notice">Esta questão precisa de opções cadastradas pelo professor.</p>}
 
         <button onClick={submitAnswer} disabled={!answer.trim() || isTransitioning}>
-          {isTransitioning ? "Aguardando pr�xima quest�o..." : "Confirmar resposta"}
+          {isTransitioning ? "Aguardando próxima questão..." : "Confirmar resposta"}
         </button>
-        {feedback && <small>{wasCorrect ? "✅ Boa! Continue assim." : "💡 Revise a explica??o antes de avan?ar."}</small>}
+        {feedback && <small>{wasCorrect ? "✅ Boa! Continue assim." : "💡 Revise a explicação antes de avançar."}</small>}
         {feedback && <p className="xp-notice" aria-live="polite">{normalizePtBrText(feedback)}</p>}
       </section>
     </AppLayout>
@@ -1635,7 +1685,7 @@ function Profile() {
       </section>
       <section className="card">
         <h3>Meus dados</h3>
-        <label htmlFor="displayName">Nome de exibi??o</label>
+        <label htmlFor="displayName">Nome de exibição</label>
         <input id="displayName" value={editing.displayName} onChange={(e) => setEditing({ ...editing, displayName: e.target.value })} placeholder="Nome de exibi??o" />
         <label htmlFor="profileEmail">E-mail</label>
         <input id="profileEmail" value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} placeholder="E-mail" />
@@ -1694,7 +1744,7 @@ function Ranking() {
   return (
     <AppLayout>
       <h2>Ranking</h2>
-      <p>Compare sua evolu��o com outros jogadores da plataforma.</p>
+      <p>Compare sua evolução com outros jogadores da plataforma.</p>
       <div className="row">
         <button onClick={() => setType("weekly")}>Semanal</button>
         <button onClick={() => setType("monthly")}>Mensal</button>
