@@ -2,44 +2,6 @@
 import { useEffect, useState } from "react";
 import api from "./services/api.js";
 
-function normalizePtBrText(value) {
-  if (value === null || value === undefined) return "";
-
-  return String(value)
-    .replace(/Ã¡/g, "á")
-    .replace(/Ã /g, "à")
-    .replace(/Ã¢/g, "â")
-    .replace(/Ã£/g, "ã")
-    .replace(/Ã¤/g, "ä")
-    .replace(/Ã©/g, "é")
-    .replace(/Ã¨/g, "è")
-    .replace(/Ãª/g, "ê")
-    .replace(/Ã«/g, "ë")
-    .replace(/Ã­/g, "í")
-    .replace(/Ã¬/g, "ì")
-    .replace(/Ã®/g, "î")
-    .replace(/Ã¯/g, "ï")
-    .replace(/Ã³/g, "ó")
-    .replace(/Ã²/g, "ò")
-    .replace(/Ã´/g, "ô")
-    .replace(/Ãµ/g, "õ")
-    .replace(/Ã¶/g, "ö")
-    .replace(/Ãº/g, "ú")
-    .replace(/Ã¹/g, "ù")
-    .replace(/Ã»/g, "û")
-    .replace(/Ã¼/g, "ü")
-    .replace(/Ã§/g, "ç")
-    .replace(/Ã‘/g, "Ñ")
-    .replace(/Ã±/g, "ñ")
-    .replace(/â/g, "'")
-    .replace(/â/g, "\"")
-    .replace(/â/g, "\"")
-    .replace(/â/g, "-")
-    .replace(/â/g, "-")
-    .replace(/â€¦/g, "...")
-    .replace(/�/g, "");
-}
-
 function getYoutubeEmbedUrl(url) {
   if (!url) return "";
   try {
@@ -56,26 +18,6 @@ function getYoutubeEmbedUrl(url) {
     return "";
   }
   return "";
-}
-function normalizeNodeTree(node) {
-  if (!node) return;
-
-  if (node.nodeType === Node.TEXT_NODE) {
-    const normalized = normalizePtBrText(node.textContent);
-    if (normalized !== node.textContent) node.textContent = normalized;
-    return;
-  }
-
-  if (node.nodeType !== Node.ELEMENT_NODE) return;
-
-  ["placeholder", "title", "aria-label"].forEach((attr) => {
-    const current = node.getAttribute(attr);
-    if (!current) return;
-    const normalized = normalizePtBrText(current);
-    if (normalized !== current) node.setAttribute(attr, normalized);
-  });
-
-  node.childNodes.forEach(normalizeNodeTree);
 }
 
 /** M?dulos descontinuados: n?o listar e redirecionar URLs diretas (ex.: API/cache antigo). */
@@ -100,7 +42,7 @@ function withoutRemovedModules(list) {
 }
 
 function buildModuleIdFromTitle(title) {
-  const base = normalizePtBrText(title || "")
+  const base = String(title || "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -458,7 +400,7 @@ function AuthPage() {
                 required
               />
               <button type="button" onClick={requestResetCode}>
-                Enviar c?digo
+                Enviar código
               </button>
               <button type="button" className="ghost" onClick={() => setMode("login")}>
                 Voltar
@@ -891,7 +833,7 @@ function ManagementPage() {
     try {
       if (!selectedClass?.code) return;
       await navigator.clipboard.writeText(selectedClass.code);
-      setCopyState("C?digo copiado!");
+      setCopyState("Código copiado!");
       window.setTimeout(() => setCopyState(""), 1800);
     } catch {
       setCopyState("Copie manualmente o código exibido.");
@@ -921,12 +863,12 @@ function ManagementPage() {
 
         <article className="card">
           <h3>Criar conteÃºdo</h3>
-          <input value={moduleForm.id} onChange={(e) => setModuleForm({ ...moduleForm, id: e.target.value })} placeholder="ID do conte?do (opcional, gerado a partir do t?tulo se vazio)" />
+          <input value={moduleForm.id} onChange={(e) => setModuleForm({ ...moduleForm, id: e.target.value })} placeholder="ID do conteúdo (opcional, gerado a partir do título se vazio)" />
           <input value={moduleForm.order} onChange={(e) => setModuleForm({ ...moduleForm, order: e.target.value })} placeholder="Ordem" type="number" />
-          <input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} placeholder="TÃ­tulo" />
-          <textarea value={moduleForm.description} onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })} placeholder="DescriÃ§Ã£o" rows={4} />
+          <input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} placeholder="Título" />
+          <textarea value={moduleForm.description} onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })} placeholder="Descrição" rows={4} />
           <div className="inline-form">
-            <input value={moduleForm.icon} onChange={(e) => setModuleForm({ ...moduleForm, icon: e.target.value })} placeholder="Ãcone" />
+            <input value={moduleForm.icon} onChange={(e) => setModuleForm({ ...moduleForm, icon: e.target.value })} placeholder="Ícone" />
             <select value={moduleForm.classId} onChange={(e) => setModuleForm({ ...moduleForm, classId: e.target.value })}>
               <option value="">Sem turma inicial</option>
               {classes.map((item) => (
@@ -981,9 +923,9 @@ function ManagementPage() {
             <option value="multipla_escolha">Múltipla escolha</option>
           </select>
           <select value={questionForm.difficulty} onChange={(e) => setQuestionForm({ ...questionForm, difficulty: e.target.value })}>
-            <option value="🟢 F?cil">FÃ¡cil</option>
-            <option value="🟡 M?dio">MÃ©dio</option>
-            <option value="🔴 Dif?cil">DifÃ­cil</option>
+            <option value="🟢 Fácil">Fácil</option>
+            <option value="🟡 Médio">Médio</option>
+            <option value="🔴 Difícil">Difícil</option>
           </select>
           <textarea value={questionForm.question} onChange={(e) => setQuestionForm({ ...questionForm, question: e.target.value })} placeholder="Enunciado do desafio" rows={4} />
           {questionForm.activityType === "multipla_escolha" && (
@@ -991,13 +933,13 @@ function ManagementPage() {
           )}
           {questionForm.activityType === "coding_challenge" && (
             <>
-              <textarea value={questionForm.starterCode} onChange={(e) => setQuestionForm({ ...questionForm, starterCode: e.target.value })} placeholder={"Código inicial, como no LeetCode"} rows={7} className="code" />
+              <textarea value={questionForm.starterCode} onChange={(e) => setQuestionForm({ ...questionForm, starterCode: e.target.value })} placeholder={"Código inicial"} rows={7} className="code" />
               <textarea value={questionForm.visibleTestsText} onChange={(e) => setQuestionForm({ ...questionForm, visibleTestsText: e.target.value })} placeholder={"Testes visíveis, um por linha\nEx: soma(2, 3) deve retornar 5"} rows={3} />
               <textarea value={questionForm.hiddenTestsText} onChange={(e) => setQuestionForm({ ...questionForm, hiddenTestsText: e.target.value })} placeholder={"Testes ocultos, um por linha"} rows={3} />
             </>
           )}
           <input value={questionForm.expectedAnswer} onChange={(e) => setQuestionForm({ ...questionForm, expectedAnswer: e.target.value })} placeholder={questionForm.activityType === "coding_challenge" ? "Palavra-chave ou trecho esperado no código" : "Resposta correta"} />
-          <textarea value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} placeholder="ExplicaÃ§Ã£o do feedback" rows={3} />
+          <textarea value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} placeholder="Explicaçã o do feedback" rows={3} />
           <button
             type="button"
             onClick={createQuestion}
@@ -1077,13 +1019,13 @@ function ManagementPage() {
             </div>
             <div className="inline-form">
               <select value={assignModuleId} onChange={(e) => setAssignModuleId(e.target.value)}>
-                <option value="">Selecione um conteÃºdo</option>
+                <option value="">Selecione um conteúdo</option>
                 {modules.map((module) => (
                   <option key={module.id} value={module.id}>{module.title}</option>
                 ))}
               </select>
               <button type="button" onClick={assignModule} disabled={!assignModuleId}>
-                Vincular conteÃºdo
+                Vincular conteúdo
               </button>
             </div>
           </article>
@@ -1107,7 +1049,7 @@ function ManagementPage() {
           </article>
 
           <article className="card">
-            <h3>ConteÃºdos da turma</h3>
+            <h3>Conteúdos da turma</h3>
             <div className="grid">
               {selectedClass.modules?.map((module) => (
                 <article key={module.id} className="badge on">
@@ -1127,11 +1069,11 @@ function ManagementPage() {
       {selectedModuleDetails && (
         <section className="management-grid">
           <article className="card">
-            <h3>Detalhes do conteÃºdo selecionado</h3>
+            <h3>Detalhes do conteúdo selecionado</h3>
             <p><strong>{selectedModuleDetails.title}</strong></p>
             <p>{selectedModuleDetails.description}</p>
             <small>Aulas cadastradas: {selectedModuleDetails.lessons?.length || 0}</small>
-            <small>QuestÃµes cadastradas: {selectedModuleDetails.activities?.length || 0}</small>
+            <small>Questões cadastradas: {selectedModuleDetails.activities?.length || 0}</small>
           </article>
           <article className="card">
             <h3>Aulas cadastradas</h3>
@@ -1139,15 +1081,15 @@ function ManagementPage() {
               {selectedModuleDetails.lessons?.map((lesson) => (
                 <article key={lesson.id} className="badge on">
                   <strong>{lesson.title}</strong>
-                  <small>Dura??o: {lesson.durationMin} min</small>
-                  <small>{lesson.videoUrl ? "Com v?deo do YouTube" : "Sem v?deo"}</small>
+                  <small>Duração: {lesson.durationMin} min</small>
+                  <small>{lesson.videoUrl ? "Com vídeo do YouTube" : "Sem vídeo"}</small>
                 </article>
               ))}
               {!selectedModuleDetails.lessons?.length && <p>Nenhuma aula cadastrada ainda.</p>}
             </div>
           </article>
           <article className="card">
-            <h3>QuestÃµes cadastradas</h3>
+            <h3>Questões cadastradas</h3>
             <div className="grid">
               {selectedModuleDetails.activities?.map((activity) => (
                 <article key={activity.id} className="badge on">
@@ -1206,7 +1148,7 @@ function ProfessorDashboard() {
             {classes.slice(0, 3).map((item) => (
               <article key={item.id} className="badge on">
                 <strong>{item.name}</strong>
-                <small>C?digo: {item.code}</small>
+                <small>Código: {item.code}</small>
                 <small>Alunos: {item.memberCount}</small>
               </article>
             ))}
@@ -1272,14 +1214,14 @@ function Dashboard() {
         <p>Continue sua jornada e alcance o próximo nível com aulas, atividades e desafios.</p>
         {nextModule ? (
           <Link to={`/modulo/${nextModule.id}`}>
-            <button>Continuar: {normalizePtBrText(nextModule.title)}</button>
+            <button>Continuar: {nextModule.title}</button>
           </Link>
         ) : (
           <p>Parabéns! Todos os módulos atuais foram concluídos.</p>
         )}
       </section>
       <h2>Olá, {user.displayName}</h2>
-      <p>Nível atual: {normalizePtBrText(user.level.title)}</p>
+      <p>Nível atual: {user.level.title}</p>
       <p>Streak: {user.streak} dias </p>
       <div className="xp-bar">
         <div className="xp-fill" style={{ width: `${progress}%` }} />
@@ -1291,8 +1233,8 @@ function Dashboard() {
         <div className="grid">
           {challenges.map((challenge) => (
             <article key={challenge.id} className="badge on">
-              <strong>{normalizePtBrText(challenge.title)}</strong>
-              <p>{normalizePtBrText(challenge.description)}</p>
+              <strong>{challenge.title}</strong>
+              <p>{challenge.description}</p>
               <button onClick={() => gainXp(challenge.type === "weekly" ? "weekly_challenge" : "hard_challenge")}>
                 Completar miss?o (+{challenge.xpReward} XP)
               </button>
@@ -1308,8 +1250,8 @@ function Dashboard() {
               <strong>
                 {module.icon} Módulo {module.order}
               </strong>
-              <p>{normalizePtBrText(module.title)}</p>
-              <small>{normalizePtBrText(module.description)}</small>
+              <p>{module.title}</p>
+              <small>{module.description}</small>
               <small>Progresso: {Math.round(moduleProgress[module.id] || 0)}%</small>
               <Link to={`/modulo/${module.id}`}>
                 <button>{(moduleProgress[module.id] || 0) > 0 ? "Continuar" : "Iniciar módulo"}</button>
@@ -1378,17 +1320,17 @@ function ModulePage() {
     <AppLayout>
       <Link to="/dashboard">Voltar ao dashboard</Link>
       <h2>
-        {module.icon} {normalizePtBrText(module.title)}
+        {module.icon} {module.title}
       </h2>
-      <p>{normalizePtBrText(module.description)}</p>
+      <p>{module.description}</p>
       {module.hasPhysicalDemo && <p className="xp-notice">Este módulo inclui demonstrações visuais com componentes físicos.</p>}
       <section className="card">
         <h3>Conteúdo do módulo</h3>
         {lesson ? (
           <>
-            <p><strong>Título:</strong> {normalizePtBrText(lesson.title)}</p>
+            <p><strong>Título:</strong> {lesson.title}</p>
             <p><strong>Duração estimada:</strong> {lesson.durationMin} minutos</p>
-            <p><strong>Resumo:</strong> {normalizePtBrText(lesson.summary)}</p>
+            <p><strong>Resumo:</strong> {lesson.summary}</p>
             {getYoutubeEmbedUrl(lesson.videoUrl) && (
               <div className="video-frame">
                 <iframe
@@ -1402,7 +1344,7 @@ function ModulePage() {
             <div className="lesson-blocks">
               {contentBlocks.map((block, index) => (
                 <div key={`${lesson.id}-block-${index}`} className="lesson-item">
-                  <p>{index + 1}. {normalizePtBrText(block)}</p>
+                  <p>{index + 1}. {block}</p>
                   <button
                     type="button"
                     className="ghost"
@@ -1432,7 +1374,7 @@ function ModulePage() {
           {interactions.map((item, index) => (
             <article key={item.id} className={`badge ${doneInteractions.includes(item.id) ? "on" : "off"}`}>
               <strong>Script {index + 1}</strong>
-              <p>{normalizePtBrText(item.prompt)}</p>
+              <p>{item.prompt}</p>
               <button
                 onClick={() => {
                   setDoneInteractions((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
@@ -1585,9 +1527,9 @@ function ActivitiesPage() {
           <strong>Tipo:</strong> {isCodingChallenge ? "Desafio de código" : "Múltipla escolha"}
         </p>
         <p>
-          <strong>Nível:</strong> {normalizePtBrText(activity.difficulty)}
+          <strong>Nível:</strong> {activity.difficulty}
         </p>
-        <p>{normalizePtBrText(activity.question)}</p>
+        <p>{activity.question}</p>
 
         {!!activity.options?.length && activity.options.map((option) => (
           <button
@@ -1623,7 +1565,7 @@ function ActivitiesPage() {
           {isTransitioning ? "Aguardando próxima questão..." : "Confirmar resposta"}
         </button>
         {feedback && <small>{wasCorrect ? "✅ Boa! Continue assim." : "💡 Revise a explicação antes de avançar."}</small>}
-        {feedback && <p className="xp-notice" aria-live="polite">{normalizePtBrText(feedback)}</p>}
+        {feedback && <p className="xp-notice" aria-live="polite">{feedback}</p>}
       </section>
     </AppLayout>
   );
@@ -1753,7 +1695,7 @@ function Ranking() {
       <ul className="card">
         {items.map((user, index) => (
           <li key={user._id} className={me && me._id === user._id ? "badge on" : ""}>
-            #{user.position || index + 1} - {user.displayName} | {normalizePtBrText(user.level?.title || "N?vel")} | {type === "weekly" ? user.weeklyXp : type === "monthly" ? user.monthlyXp : user.xp} XP
+            #{user.position || index + 1} - {user.displayName} | {user.level?.title || "N?vel"} | {type === "weekly" ? user.weeklyXp : type === "monthly" ? user.monthlyXp : user.xp} XP
           </li>
         ))}
       </ul>
@@ -1766,25 +1708,6 @@ function Protected({ children }) {
 }
 
 export default function App() {
-  useEffect(() => {
-    normalizeNodeTree(document.body);
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach(normalizeNodeTree);
-        if (mutation.type === "characterData") normalizeNodeTree(mutation.target);
-      });
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <>
       <Routes>
