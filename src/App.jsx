@@ -847,7 +847,7 @@ function ManagementPage() {
     <AppLayout>
       <section className="card">
         <h2>Gestão acadêmica</h2>
-        <p>VocÃª está autenticado como professor. Aqui você cria turmas, gera convites autom?ticos, publica aulas e gerencia quest?es dos seus conte?dos.</p>
+        <p>Você está autenticado como professor. Aqui você cria turmas, gera convites automáticos, publica aulas e gerencia questões dos seus conteúdos.</p>
         {message && <p className="xp-notice">{message}</p>}
       </section>
 
@@ -855,14 +855,14 @@ function ManagementPage() {
         <article className="card">
           <h3>Criar turma</h3>
           <input value={classForm.name} onChange={(e) => setClassForm({ ...classForm, name: e.target.value })} placeholder="Nome da turma" />
-          <textarea value={classForm.description} onChange={(e) => setClassForm({ ...classForm, description: e.target.value })} placeholder="DescriÃ§Ã£o da turma" rows={4} />
+          <textarea value={classForm.description} onChange={(e) => setClassForm({ ...classForm, description: e.target.value })} placeholder="Descrição da turma" rows={4} />
           <button type="button" onClick={createClass} disabled={!classForm.name.trim()}>
             Criar turma
           </button>
         </article>
 
         <article className="card">
-          <h3>Criar conteÃºdo</h3>
+          <h3>Criar conteúdo</h3>
           <input value={moduleForm.id} onChange={(e) => setModuleForm({ ...moduleForm, id: e.target.value })} placeholder="ID do conteúdo (opcional, gerado a partir do título se vazio)" />
           <input value={moduleForm.order} onChange={(e) => setModuleForm({ ...moduleForm, order: e.target.value })} placeholder="Ordem" type="number" />
           <input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} placeholder="Título" />
@@ -888,7 +888,7 @@ function ManagementPage() {
         <article className="card">
           <h3>Adicionar aula</h3>
           <select value={lessonForm.moduleId} onChange={(e) => setLessonForm({ ...lessonForm, moduleId: e.target.value })}>
-            <option value="">Selecione um mÃ³dulo</option>
+            <option value="">Selecione um módulo</option>
             {modules.map((module) => (
               <option key={module.id} value={module.id}>{module.title}</option>
             ))}
@@ -912,7 +912,7 @@ function ManagementPage() {
         <article className="card">
           <h3>Criar desafio</h3>
           <select value={questionForm.moduleId} onChange={(e) => setQuestionForm({ ...questionForm, moduleId: e.target.value })}>
-            <option value="">Selecione um mÃ³dulo</option>
+            <option value="">Selecione um módulo</option>
             {modules.map((module) => (
               <option key={module.id} value={module.id}>{module.title}</option>
             ))}
