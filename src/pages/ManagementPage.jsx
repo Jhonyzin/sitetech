@@ -595,7 +595,22 @@ export default function ManagementPage() {
           </article>
         </section>
       )}
+      <section className="card">
+  <h3>Selecionar conteúdo</h3>
 
+  <select
+    value={selectedModuleId}
+    onChange={(e) => setSelectedModuleId(e.target.value)}
+  >
+    <option value="">Selecione um conteúdo</option>
+
+    {modules.map((module) => (
+      <option key={module.id} value={module.id}>
+        {module.title}
+      </option>
+    ))}
+  </select>
+</section>
       {selectedModuleDetails && (
         <section className="management-grid">
           <article className="card">
