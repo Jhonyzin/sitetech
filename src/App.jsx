@@ -381,7 +381,7 @@ function AuthPage() {
                 </>
               ) : (
                 <button type="button" className="ghost" onClick={() => setMode("login")}>
-                  J? tenho conta
+                  Já tenho conta
                 </button>
               )}
             </>
@@ -389,7 +389,7 @@ function AuthPage() {
           {mode === "recover" && (
             <>
               <span className="auth-mark" aria-hidden="true">✦</span>
-              <h3>Recupera??o de senha</h3>
+              <h3>Recuperação de senha</h3>
               <input
                 placeholder="Informe seu e-mail"
                 type="email"
@@ -770,7 +770,7 @@ function ManagementPage() {
   async function deleteModule(moduleId) {
     try {
       await api.delete(`/content/modules/${moduleId}`);
-      setMessage("ConteÃºdo removido.");
+      setMessage("Conteúdo removido.");
       await refreshAll();
     } catch (error) {
       setMessage(error.response?.data?.message || "Não foi possível remover o conteúdo.");
@@ -780,7 +780,7 @@ function ManagementPage() {
   async function deleteQuestion(moduleId, activityId) {
     try {
       await api.delete(`/content/modules/${moduleId}/activities/${activityId}`);
-      setMessage("QuestÃ£o removida.");
+      setMessage("Questão removida.");
       await refreshAll(selectedClassId, moduleId);
     } catch (error) {
       setMessage(error.response?.data?.message || "Não foi possível remover a questão.");
@@ -794,7 +794,7 @@ function ManagementPage() {
       setMemberEmail("");
       await refreshAll(selectedClassId);
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possí­vel adicionar o aluno.");
+      setMessage(error.response?.data?.message || "Não foi possível adicionar o aluno.");
     }
   }
 
@@ -804,7 +804,7 @@ function ManagementPage() {
       setMessage("Aluno removido da turma.");
       await refreshAll(selectedClassId);
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possí­vel remover o aluno.");
+      setMessage(error.response?.data?.message || "Não foi possível remover o aluno.");
     }
   }
 
@@ -815,7 +815,7 @@ function ManagementPage() {
       setAssignModuleId("");
       await refreshAll(selectedClassId);
     } catch (error) {
-      setMessage(error.response?.data?.message || "NÃ£o foi possí­vel vincular o conteÃºdo.");
+      setMessage(error.response?.data?.message || "Não foi possível vincular o conteúdo.");
     }
   }
 
