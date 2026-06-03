@@ -934,11 +934,11 @@ function ManagementPage() {
           {questionForm.activityType === "coding_challenge" && (
             <>
               <textarea value={questionForm.starterCode} onChange={(e) => setQuestionForm({ ...questionForm, starterCode: e.target.value })} placeholder={"Código inicial"} rows={7} className="code" />
-              <textarea value={questionForm.visibleTestsText} onChange={(e) => setQuestionForm({ ...questionForm, visibleTestsText: e.target.value })} placeholder={"Testes visíveis, um por linha\nEx: soma(2, 3) deve retornar 5"} rows={3} />
-              <textarea value={questionForm.hiddenTestsText} onChange={(e) => setQuestionForm({ ...questionForm, hiddenTestsText: e.target.value })} placeholder={"Testes ocultos, um por linha"} rows={3} />
+              <textarea value={questionForm.visibleTestsText} onChange={(e) => setQuestionForm({ ...questionForm, visibleTestsText: e.target.value })} placeholder={"Testes visíveis, um por linha\nEx: 2 3 => 5"} rows={3} />
+              <textarea value={questionForm.hiddenTestsText} onChange={(e) => setQuestionForm({ ...questionForm, hiddenTestsText: e.target.value })} placeholder={"Testes ocultos, um por linha\nEx: {\"stdin\":\"10 5\",\"expectedStdout\":\"15\"}"} rows={3} />
             </>
           )}
-          <input value={questionForm.expectedAnswer} onChange={(e) => setQuestionForm({ ...questionForm, expectedAnswer: e.target.value })} placeholder={questionForm.activityType === "coding_challenge" ? "Palavra-chave ou trecho esperado no código" : "Resposta correta"} />
+          <input value={questionForm.expectedAnswer} onChange={(e) => setQuestionForm({ ...questionForm, expectedAnswer: e.target.value })} placeholder={questionForm.activityType === "coding_challenge" ? "Saída esperada padrão" : "Resposta correta"} />
           <textarea value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} placeholder="Explicaçã o do feedback" rows={3} />
           <button
             type="button"
@@ -1096,7 +1096,7 @@ function ManagementPage() {
                   <strong>{activity.title}</strong>
                   <small>Tipo: {activity.type === "coding_challenge" ? "Desafio de código" : "Múltipla escolha"}</small>
                   <small>{activity.question}</small>
-                  <small>{activity.type === "coding_challenge" ? "Trecho esperado" : "Resposta correta"}: {activity.expectedAnswer}</small>
+                  <small>{activity.type === "coding_challenge" ? "Saída esperada" : "Resposta correta"}: {activity.expectedAnswer}</small>
                   <button type="button" onClick={() => deleteQuestion(selectedModuleDetails.id, activity.id)}>
                     Remover questão
                   </button>
@@ -1469,34 +1469,53 @@ function ActivitiesPage() {
     if (!answer.trim() || isTransitioning) return;
 
     setIsTransitioning(true);
-    const normalized = answer.trim().toLowerCase();
-    const isCorrect =
-      isCodingChallenge
-        ? normalizedExpectedAnswer ? normalized.includes(normalizedExpectedAnswer) : true
-        : normalized === normalizedExpectedAnswer;
+    let evaluation;
 
-    if (isCorrect) {
-      setFeedback(`Correto! ${activity.explanation}`);
+    try {
+      const { data } = await api.post(`/content/activities/${activity.id}/submit`, {
+        answer,
+        code: isCodingChallenge ? answer : undefined
+      });
+      evaluation = data;
+    } catch (error) {
+      setFeedback(error.response?.data?.message || "Não foi possível avaliar a resposta agora.");
+      setWasCorrect(false);
+      setIsTransitioning(false);
+      return;
+    }
+
+    const nextCorrectCount = evaluation.isCorrect && !scoredActivities.includes(activity.id) ? correctCount + 1 : correctCount;
+
+    if (evaluation.isCorrect) {
+      const passedTests = isCodingChallenge && evaluation.tests?.length ? ` Testes aprovados: ${evaluation.tests.length}.` : "";
+      setFeedback(`Correto!${passedTests} ${evaluation.explanation || activity.explanation}`);
       setWasCorrect(true);
       if (!scoredActivities.includes(activity.id)) {
-        setCorrectCount((v) => v + 1);
+        setCorrectCount(nextCorrectCount);
         setScoredActivities((prev) => [...prev, activity.id]);
         await api.post("/users/me/xp", { action: "activity_completed" });
       }
     } else {
-      setFeedback(`Resposta esperada: ${activity.expectedAnswer}. ${activity.explanation}`);
+      const firstFailedTest = evaluation.tests?.find((test) => !test.passed);
+      const outputFeedback = firstFailedTest && !firstFailedTest.hidden
+        ? ` Saída obtida: ${firstFailedTest.actualStdout || "(vazia)"}. Saída esperada: ${firstFailedTest.expectedStdout || "(vazia)"}.`
+        : "";
+      const answerFeedback = isCodingChallenge
+        ? outputFeedback
+        : ` Resposta esperada: ${evaluation.expectedAnswer || activity.expectedAnswer}.`;
+      setFeedback(`${answerFeedback} ${evaluation.explanation || activity.explanation}`);
       setWasCorrect(false);
     }
 
     window.setTimeout(() => {
-      nextQuestion();
+      nextQuestion(nextCorrectCount);
     }, 1800);
   }
 
-  async function nextQuestion() {
+  async function nextQuestion(finalCorrectCount = correctCount) {
     const last = index === activities.length - 1;
     if (last) {
-      if (correctCount === activities.length) {
+      if (finalCorrectCount === activities.length) {
         await api.post("/users/me/xp", { action: "perfect_activity" });
       }
       await api.post("/users/me/xp", { action: "activity_review" });
@@ -1555,14 +1574,14 @@ function ActivitiesPage() {
             </div>
             <label>Editor de código</label>
             <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={12} className="code" disabled={isTransitioning} spellCheck="false" />
-            <small>Resolva como em um desafio de programação. O sistema confere se o trecho esperado aparece na solução.</small>
+            <small>Resolva como em um desafio de programação. O backend executa o código e compara a saída com o resultado esperado.</small>
           </div>
         )}
 
         {!activity.options?.length && !isCodingChallenge && <p className="xp-notice">Esta questão precisa de opções cadastradas pelo professor.</p>}
 
         <button onClick={submitAnswer} disabled={!answer.trim() || isTransitioning}>
-          {isTransitioning ? "Aguardando próxima questão..." : "Confirmar resposta"}
+          {isTransitioning ? (isCodingChallenge ? "Executando código..." : "Aguardando próxima questão...") : "Confirmar resposta"}
         </button>
         {feedback && <small>{wasCorrect ? "✅ Boa! Continue assim." : "💡 Revise a explicação antes de avançar."}</small>}
         {feedback && <p className="xp-notice" aria-live="polite">{feedback}</p>}
