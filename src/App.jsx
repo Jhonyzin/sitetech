@@ -20,7 +20,7 @@ function getYoutubeEmbedUrl(url) {
   return "";
 }
 
-/** M?dulos descontinuados: n?o listar e redirecionar URLs diretas (ex.: API/cache antigo). */
+/** Módulos descontinuados: n?o listar e redirecionar URLs diretas (ex.: API/cache antigo). */
 const REMOVED_MODULE_IDS = new Set(["m11"]);
 
 function isRemovedModule(module) {
@@ -735,7 +735,8 @@ function ManagementPage() {
         .split(/\r?\n/)
         .map((item) => item.trim())
         .filter(Boolean);
-      await api.post(`/content/modules/${questionForm.moduleId}/activities`, {
+      const targetModuleId = questionForm.moduleId;
+      await api.post(`/content/modules/${targetModuleId}/activities`, {
         title: questionForm.title,
         activityType: questionForm.activityType,
         difficulty: questionForm.difficulty,
@@ -761,7 +762,7 @@ function ManagementPage() {
         hiddenTestsText: "",
         explanation: ""
       });
-      await refreshAll(selectedClassId, questionForm.moduleId);
+      await refreshAll(selectedClassId, targetModuleId);
     } catch (error) {
       setMessage(error.response?.data?.message || "Não foi possível criar a questão.");
     }
@@ -1137,10 +1138,10 @@ function ProfessorDashboard() {
 
       <section className="management-grid">
         <article className="card">
-          <h3>Vis?o geral</h3>
+          <h3>Visão geral</h3>
           <p><strong>{user.displayName}</strong></p>
           <small>Turmas ativas: {classes.length}</small>
-          <small>Conte?dos criados: {modules.length}</small>
+          <small>Conteúdos criados: {modules.length}</small>
         </article>
         <article className="card">
           <h3>Convites recentes</h3>
@@ -1158,7 +1159,7 @@ function ProfessorDashboard() {
       </section>
 
       <section className="card">
-        <h3>Conte?dos do professor</h3>
+        <h3>Conteúdos do professor</h3>
         <div className="grid">
           {modules.map((module) => (
             <article key={module.id} className="badge on">
@@ -1236,7 +1237,7 @@ function Dashboard() {
               <strong>{challenge.title}</strong>
               <p>{challenge.description}</p>
               <button onClick={() => gainXp(challenge.type === "weekly" ? "weekly_challenge" : "hard_challenge")}>
-                Completar miss?o (+{challenge.xpReward} XP)
+                Completar missão (+{challenge.xpReward} XP)
               </button>
             </article>
           ))}
@@ -1358,7 +1359,7 @@ function ModulePage() {
                 </div>
               ))}
             </div>
-            <small>Dica prtica: assista ao vdeo, leia os blocos e depois conclua a aula.</small>
+            <small>Dica pratica: assista ao video, leia os blocos e depois conclua a aula.</small>
             <small>Leitura concluída: {readBlocks.length}/{contentBlocks.length} blocos</small>
             <button onClick={completeLesson} disabled={!hasReadAll || lessonDone}>
               {lessonDone ? "Aula concluída (+10 XP)" : "Concluir aula agora (+10 XP)"}
@@ -1505,6 +1506,8 @@ function ActivitiesPage() {
         : ` Resposta esperada: ${evaluation.expectedAnswer || activity.expectedAnswer}.`;
       setFeedback(`${answerFeedback} ${evaluation.explanation || activity.explanation}`);
       setWasCorrect(false);
+      setIsTransitioning(false);
+      return;
     }
 
     window.setTimeout(() => {
@@ -1583,7 +1586,11 @@ function ActivitiesPage() {
         <button onClick={submitAnswer} disabled={!answer.trim() || isTransitioning}>
           {isTransitioning ? (isCodingChallenge ? "Executando código..." : "Aguardando próxima questão...") : "Confirmar resposta"}
         </button>
-        {feedback && <small>{wasCorrect ? "✅ Boa! Continue assim." : "💡 Revise a explicação antes de avançar."}</small>}
+        {feedback && (
+          <small>
+            {wasCorrect ? "✅ Boa! Avançando para a próxima questão..." : "💡 Resposta incorreta. Ajuste e tente novamente."}
+          </small>
+        )}
         {feedback && <p className="xp-notice" aria-live="polite">{feedback}</p>}
       </section>
     </AppLayout>
