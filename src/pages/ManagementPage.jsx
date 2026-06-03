@@ -203,6 +203,16 @@ export default function ManagementPage() {
     }
   }
 
+  async function deleteLesson(moduleId, lessonId) {
+    try {
+      await api.delete(`/content/modules/${moduleId}/lessons/${lessonId}`);
+      setMessage("Aula removida.");
+      await refreshAll(selectedClassId, moduleId);
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Não foi possível remover a aula.");
+    }
+  }
+
   async function addMember() {
     try {
       await api.post(`/users/classes/${selectedClassId}/members`, { email: memberEmail });
@@ -630,6 +640,9 @@ export default function ManagementPage() {
                   <strong>{lesson.title}</strong>
                   <small>Duração: {lesson.durationMin} min</small>
                   <small>{lesson.videoUrl ? "Com vídeo do YouTube" : "Sem vídeo"}</small>
+                  <button type="button" onClick={() => deleteLesson(selectedModuleDetails.id, lesson.id)}>
+                    Remover aula
+                  </button>
                 </article>
               ))}
               {!selectedModuleDetails.lessons?.length && <p>Nenhuma aula cadastrada ainda.</p>}
